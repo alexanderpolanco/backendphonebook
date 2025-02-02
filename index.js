@@ -1,15 +1,23 @@
 const express = require("express");
-const morgan = require('morgan')
+const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
 
-app.use(express.json());
-morgan.token('body', function (req, res) { return JSON.stringify(req.body) });
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
+app.use(cors());
 
+app.use(express.static('dist'))
+
+app.use(express.json());
+morgan.token("body", function (req, res) {
+  return JSON.stringify(req.body);
+});
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
 
 function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
+  return Math.floor(Math.random() * max);
+}
 
 let phonebook = [
   {
@@ -70,21 +78,23 @@ app.post("/api/persons", (request, response) => {
     number: person.number,
   };
 
-  if("name" in person === false ){
-    response.status(400).json({ error: 'name is required' });
-    return
+  if ("name" in person === false) {
+    response.status(400).json({ error: "name is required" });
+    return;
   }
 
-  if("number" in person === false ){
-    response.status(400).json({ error: 'number is required' });
-    return
+  if ("number" in person === false) {
+    response.status(400).json({ error: "number is required" });
+    return;
   }
 
-  const isPerson = phonebook.find((person) => person.name.toLowerCase() === newPerson.name.toLowerCase());
+  const isPerson = phonebook.find(
+    (person) => person.name.toLowerCase() === newPerson.name.toLowerCase()
+  );
 
-  if(isPerson !== undefined){
+  if (isPerson !== undefined) {
     response.status(400).json({ error: "the person's name already exists" });
-    return
+    return;
   }
   response.json(newPerson);
 });
@@ -99,7 +109,7 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).json(person);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

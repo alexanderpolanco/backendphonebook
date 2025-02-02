@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch index.js"
+    "dev": "node --env-file=.env.development --watch index.js",
+    "prod": "node --env-file=.env.production --watch index.js",
+    "build:ui": "rm -rf dist && cd ../../Parte2/2.6_2.17_phonebook && npm run build && cp -r dist ../../Parte3/3.1_3.22",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
   "repository": {
     "type": "git",
@@ -14,6 +17,7 @@
   "author": "Jose Polanco",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.21.2",
     "morgan": "^1.10.0"
   }
