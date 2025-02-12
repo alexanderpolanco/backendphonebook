@@ -9,9 +9,11 @@ app.use(cors());
 app.use(express.static("dist"));
 
 app.use(express.json());
+
 morgan.token("body", function (req, res) {
   return JSON.stringify(req.body);
 });
+
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
@@ -35,15 +37,17 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
-  PhoneBook.find({ _id: id })
+  PhoneBook.findById(id)
     .then((result) => {
-      response.json(result);
+      if (result) {
+        response.json(result)
+      } else {
+        response.status(404).end()
+      }
     })
-    .catch((error) => {
-      response.status(404).send("Person not found");
-    });
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response) => {
@@ -63,36 +67,62 @@ app.post("/api/persons", (request, response) => {
     return;
   }
 
-  const person = new PhoneBook({ ...newPerson });
-  person.save().then((result) => {
-    response.json(result);
-  });
-
-  /*
-  const isPerson = phonebook.find(
-    (person) => person.name.toLowerCase() === newPerson.name.toLowerCase()
-  );
-
-  if (isPerson !== undefined) {
-    response.status(400).json({ error: "the person's name already exists" });
-    return;
-  }
-
-  */
-  //response.json(newPerson);
+  PhoneBook.find({ name: newPerson.name })
+    .then((result) => {
+      if (result.length === 0) {
+        const person = new PhoneBook({ ...newPerson });
+        person.save().then((result) => {
+          response.json(result);
+        });
+      } else {
+        response.status(400).send("the person's name already exists");
+      }
+    })
+    .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.put("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
-  PhoneBook.find({ _id: id })
+  const requestPerson = request.body;
+
+  const newPerson = {
+    name: requestPerson.name,
+    number: requestPerson.number,
+  };
+
+  PhoneBook.findByIdAndUpdate(id, newPerson, { new: true })
     .then((result) => {
       response.json(result);
     })
-    .catch((error) => {
-      response.status(404).send("Person not found");
-    });
-  response.status(204).json(person);
+    .catch((error) => next(error));
 });
+
+app.delete("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
+  PhoneBook.findByIdAndDelete(id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
+});
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
