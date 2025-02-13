@@ -33,7 +33,7 @@ if (process.argv.length > 3) {
     console.log(`added ${result.name} number ${result.number} to phonebook`);
     mongoose.connection.close();
   });
-} else if (process.argv.length == 3) {
+} else if (process.argv.length === 3) {
   Person.find({}).then((result) => {
     console.log("phonebook");
     result.forEach((person) => {

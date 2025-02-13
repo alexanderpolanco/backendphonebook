@@ -10,7 +10,7 @@ app.use(express.static("dist"));
 
 app.use(express.json());
 
-morgan.token("body", function (req, res) {
+morgan.token("body", function (req) {
   return JSON.stringify(req.body);
 });
 
@@ -27,7 +27,7 @@ app.get("/info", (request, response) => {
 
   const formattedDate = currentDate.toString();
   response.send(
-    `<p>Phonebook has info for ${phonebook.length} people</p><p>${formattedDate}</p>`
+    `Phonebook ${formattedDate}`
   );
 });
 
@@ -89,7 +89,7 @@ app.put("/api/persons/:id", (request, response, next) => {
 app.delete("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
   PhoneBook.findByIdAndDelete(id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end();
     })
     .catch((error) => next(error));

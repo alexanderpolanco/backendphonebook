@@ -8,7 +8,8 @@
     "dev": "node --env-file=.env.development --watch index.js",
     "prod": "node --env-file=.env.production --watch index.js",
     "build:ui": "rm -rf dist && cd ../../Parte2/2.6_2.17_phonebook && npm run build && cp -r dist ../../Parte3/3.1_3.22",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push --set-upstream origin main"
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,10 @@
     "express": "^4.21.2",
     "mongoose": "^8.10.0",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.1",
+    "globals": "^15.15.0"
   }
 }
