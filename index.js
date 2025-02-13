@@ -42,41 +42,26 @@ app.get("/api/persons/:id", (request, response, next) => {
   PhoneBook.findById(id)
     .then((result) => {
       if (result) {
-        response.json(result)
+        response.json(result);
       } else {
-        response.status(404).end()
+        response.status(404).end();
       }
     })
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const requestPerson = request.body;
   const newPerson = {
-    name: requestPerson.name,
-    number: requestPerson.number,
+    name: requestPerson.name.trim(),
+    number: requestPerson.number.trim(),
   };
 
-  if ("name" in requestPerson === false) {
-    response.status(400).json({ error: "name is required" });
-    return;
-  }
-
-  if ("number" in requestPerson === false) {
-    response.status(400).json({ error: "number is required" });
-    return;
-  }
-
-  PhoneBook.find({ name: newPerson.name })
+  const person = new PhoneBook({ ...newPerson });
+  person
+    .save()
     .then((result) => {
-      if (result.length === 0) {
-        const person = new PhoneBook({ ...newPerson });
-        person.save().then((result) => {
-          response.json(result);
-        });
-      } else {
-        response.status(400).send("the person's name already exists");
-      }
+      response.json(result);
     })
     .catch((error) => next(error));
 });
@@ -90,7 +75,11 @@ app.put("/api/persons/:id", (request, response, next) => {
     number: requestPerson.number,
   };
 
-  PhoneBook.findByIdAndUpdate(id, newPerson, { new: true })
+  PhoneBook.findByIdAndUpdate(id, newPerson, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
     .then((result) => {
       response.json(result);
     })
@@ -117,6 +106,11 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (
+    error.name === "ValidationError" ||
+    error.number === "ValidationError"
+  ) {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);

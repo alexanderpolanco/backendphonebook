@@ -1,8 +1,24 @@
 const mongoose = require("../conexion");
 
 const phoneBookSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minLength: 3,
+    required: true,
+    unique: [true, "name already exists"],
+  },
+  number: {
+    type: String,
+    minLength: 10,
+    required: [true, "number is required"],
+    unique: [true, "number already exists"],
+    validate: {
+      validator: function (number) {
+        return /\d{2}-\d{1}-\d{8}/.test(number);
+      },
+      message: (props) => `${props.value} is not a valid phone number!`,
+    },
+  },
 });
 
 phoneBookSchema.set("toJSON", {
@@ -13,4 +29,4 @@ phoneBookSchema.set("toJSON", {
   },
 });
 
-module.exports = mongoose.model('PhoneBook', phoneBookSchema)
+module.exports = mongoose.model("PhoneBook", phoneBookSchema);
