@@ -5,13 +5,11 @@ const phoneBookSchema = new mongoose.Schema({
     type: String,
     minLength: 3,
     required: true,
-    unique: [true, "name already exists"],
   },
   number: {
     type: String,
     minLength: 10,
     required: [true, "number is required"],
-    unique: [true, "number already exists"],
     validate: {
       validator: function (number) {
         return /\d{2}-\d{1}-\d{8}/.test(number);

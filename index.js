@@ -26,9 +26,7 @@ app.get("/info", (request, response) => {
   const currentDate = new Date();
 
   const formattedDate = currentDate.toString();
-  response.send(
-    `Phonebook ${formattedDate}`
-  );
+  response.send(`Phonebook ${formattedDate}`);
 });
 
 app.get("/api/persons", (request, response) => {
@@ -102,17 +100,14 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint);
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message);
-
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
   } else if (
     error.name === "ValidationError" ||
     error.number === "ValidationError"
   ) {
-    return response.status(400).json({ error: error.message });
+    return response.status(400).json({ error: error.message.toString() });
   }
-
   next(error);
 };
 
